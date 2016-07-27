@@ -157,7 +157,7 @@ class _ZHandler:
         data = list(filter(_functools.partial(self._doesitmatch, pats), data))
 
         if args.action == 'cd':
-            _dirstack.cd(data[0].path)
+            _dirstack.cd([data[0].path])
         elif args.action == 'echo':
             return data[0].path + '\n'
         elif args.action == 'list':
@@ -166,9 +166,9 @@ class _ZHandler:
 
 
     def getpwd(self):
-        pwd = os.getcwd()
+        pwd = _os.getcwd()
         if not self.Z_NO_RESOLVE_SYMLINKS:
-            pwd = os.normpath(pwd)
+            pwd = _os.normpath(pwd)
         return pwd
 
     def add(self, path):
