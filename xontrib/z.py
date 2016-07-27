@@ -20,30 +20,30 @@ class _ZEntry(_collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
         elif dx < _datetime.timedelta(days=1):
             return self.rank * 2
         elif dx < _datetime.timedelta(weeks=1):
-            return rank / 2
+            return self.rank / 2
         else:
-            return rank / 4
+            return self.rank / 4
 
 class _ZHandler:
     """Tracks your most used directories, based on 'frecency'.
 
-   After  a  short  learning  phase, z will take you to the most 'frecent'
-   directory that matches ALL of the regexes given on the command line, in
-   order.
+    After  a  short  learning  phase, z will take you to the most 'frecent'
+    directory that matches ALL of the regexes given on the command line, in
+    order.
 
-   For example, z foo bar would match /foo/bar but not /bar/foo.
-   """
-   GROOM_THRESHOLD = 9000
-   GROOM_LEVEL = 0.99
+    For example, z foo bar would match /foo/bar but not /bar/foo.
+    """
+    GROOM_THRESHOLD = 9000
+    GROOM_LEVEL = 0.99
 
-   def parser():
+    def parser():
         from argparse import ArgumentParser
         parser = ArgumentParser(prog='avox', description=__doc__)
 
         parser.add_argument('patterns', metavar='REGEX', nargs='+',
                             help='Names to match')
    
-        parse.add_argument('-c', default=False,
+        parser.add_argument('-c', default=False,
                             action='store_true', dest='subdir_only',
                             help='restrict matches to subdirectories of the current directory')
 
@@ -57,9 +57,9 @@ class _ZHandler:
         actions.add_argument('-x', const='remove', default='cd',
                            action='store_const', dest='action',
                            help='remove the current directory from the datafile')
-        actions.add_argument('-h', const='help', default='cd',
-                           action='store_const', dest='action',
-                           help='show a brief help message')
+        # actions.add_argument('-h', const='help', default='cd',
+        #                    action='store_const', dest='action',
+        #                    help='show a brief help message')
 
         modes = parser.add_mutually_exclusive_group()
         modes.add_argument('-r', const='rank', default='frecency',
@@ -112,12 +112,13 @@ class _ZHandler:
                 _os.remove(self.Z_DATA)
             _os.rename(f.name, self.Z_DATA)
 
-    def _doesitmatch(self, patterns, path):
+    def _doesitmatch(self, patterns, entry):
         """
         Checks that a series of patterns match against a path.
 
         Each one is checked in sequence. They must be in order and non-overlapping.
         """
+        path = entry.path
         for p in patterns:
             m = p.search(path)
             if m is None: return False
@@ -153,7 +154,7 @@ class _ZHandler:
 
         # Actually do search
         pats = map(_re.compile, args.patterns)
-        data = filter(_funtools.partial(self._doesitmatch, pats), data)
+        data = filter(_functools.partial(self._doesitmatch, pats), data)
 
         if args.action == 'cd':
             _dirstack.cd(data[0])
