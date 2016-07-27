@@ -153,16 +153,16 @@ class _ZHandler:
             raise RuntimeError("Unknown sort mode: {}".format(args.mode))
 
         # Actually do search
-        pats = map(_re.compile, args.patterns)
-        data = filter(_functools.partial(self._doesitmatch, pats), data)
+        pats = list(map(_re.compile, args.patterns))  # Used repeatedly, pre-evaluate
+        data = list(filter(_functools.partial(self._doesitmatch, pats), data))
 
         if args.action == 'cd':
-            _dirstack.cd(data[0])
+            _dirstack.cd(data[0].path)
         elif args.action == 'echo':
-            return data[0]
+            return data[0].path + '\n'
         elif args.action == 'list':
             # FIXME: Prefix with sort key
-            return '\n'.join(e.path for e in data)
+            return '\n'.join(e.path for e in data)+'\n'
 
 
     def getpwd(self):
