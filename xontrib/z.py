@@ -8,6 +8,7 @@ import datetime as _datetime
 import shutil as _shutil
 import xonsh.lazyasd as _lazyasd
 import xonsh.dirstack as _dirstack
+import xonsh.built_ins as _built_ins
 
 _old_cd = aliases['cd']
 
@@ -98,7 +99,7 @@ class _ZHandler:
 
         # Use a temporary file to minimize time the file is open and minimize clobbering
         from tempfile import NamedTemporaryFile
-        with NamedTemporaryFile(encoding=_sys.getfilesystemencoding()) as f:
+        with NamedTemporaryFile('wt', encoding=_sys.getfilesystemencoding()) as f:
             for e in data:
                 f.write("{}|{}|{}\n".format(e.path, e.rank, int(e.time.timestamp())))
 
@@ -110,7 +111,7 @@ class _ZHandler:
             from xonsh.platform import ON_WINDOWS
             if ON_WINDOWS and _os.path.exists(self.Z_DATA):
                 _os.remove(self.Z_DATA)
-            _os.rename(f.name, self.Z_DATA)
+            _shutil.copy(f.name, self.Z_DATA)
 
     def _doesitmatch(self, patterns, entry):
         """
@@ -157,7 +158,7 @@ class _ZHandler:
         data = list(filter(_functools.partial(self._doesitmatch, pats), data))
 
         if args.action == 'cd':
-            _dirstack.cd([data[0].path])
+            _built_ins.run_subproc([['cd', data[0].path]])
         elif args.action == 'echo':
             return data[0].path + '\n'
         elif args.action == 'list':
@@ -168,18 +169,18 @@ class _ZHandler:
     def getpwd(self):
         pwd = _os.getcwd()
         if not self.Z_NO_RESOLVE_SYMLINKS:
-            pwd = _os.normpath(pwd)
+            pwd = _os.path.normpath(pwd)
         return pwd
 
     def add(self, path):
         now = _datetime.datetime.utcnow()
         data = list(self.load_data())
         for i, e in enumerate(data):
-            if e.path == pwd:
+            if e.path == path:
                 data[i] = _ZEntry(e.path, e.rank+1, now)
                 break
         else:
-            data.append(_ZEntry(pwd, 1, now))
+            data.append(_ZEntry(path, 1, now))
         self.save_data(data)
 
     def remove(self, path):
