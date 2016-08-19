@@ -1,26 +1,27 @@
 """Tracks your most used directories, based on 'frecency'"""
-import os as _os
-import sys as _sys
-import re as _re
-import functools as _functools
-import collections as _collections
-import datetime as _datetime
-import shutil as _shutil
-import xonsh.lazyasd as _lazyasd
-import xonsh.dirstack as _dirstack
-import xonsh.built_ins as _built_ins
+import os
+import sys
+import re
+import functools
+import collections
+import datetime
+import shutil
+import xonsh.lazyasd as lazyasd
+import xonsh.built_ins as built_ins
+
+__all__ = ()
 
 _old_cd = aliases['cd']
 
-class _ZEntry(_collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
+class _ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
     @property
     def frecency(self):
-        dx = _datetime.datetime.utcnow() - self.time
-        if dx < _datetime.timedelta(hours=1):
+        dx = datetime.datetime.utcnow() - self.time
+        if dx < datetime.timedelta(hours=1):
             return self.rank * 4
-        elif dx < _datetime.timedelta(days=1):
+        elif dx < datetime.timedelta(days=1):
             return self.rank * 2
-        elif dx < _datetime.timedelta(weeks=1):
+        elif dx < datetime.timedelta(weeks=1):
             return self.rank / 2
         else:
             return self.rank / 4
@@ -72,10 +73,10 @@ class _ZHandler:
 
         return parser
 
-    parser = _lazyasd.LazyObject(parser, locals(), 'parser')
+    parser = lazyasd.LazyObject(parser, locals(), 'parser')
 
     def __init__(self):
-        self.Z_DATA = __xonsh_env__.get('_Z_DATA', _os.path.expanduser('~/.z'))
+        self.Z_DATA = __xonsh_env__.get('_Z_DATA', os.path.expanduser('~/.z'))
         self.Z_OWNER = __xonsh_env__.get('_Z_OWNER')
         self.Z_NO_RESOLVE_SYMLINKS = __xonsh_env__.get('_Z_NO_RESOLVE_SYMLINKS', False)
         self.Z_EXCLUDE_DIRS = __xonsh_env__.get('_Z_EXCLUDE_DIRS', [])
@@ -88,7 +89,7 @@ class _ZHandler:
                 p, r, t = l.split('|')
                 r = int(r)
                 if r >= 1:
-                    t = _datetime.datetime.utcfromtimestamp(int(t))
+                    t = datetime.datetime.utcfromtimestamp(int(t))
                     yield _ZEntry(p, r, t)
 
     def save_data(self, data):
@@ -99,19 +100,19 @@ class _ZHandler:
 
         # Use a temporary file to minimize time the file is open and minimize clobbering
         from tempfile import NamedTemporaryFile
-        with NamedTemporaryFile('wt', encoding=_sys.getfilesystemencoding()) as f:
+        with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding()) as f:
             for e in data:
                 f.write("{}|{}|{}\n".format(e.path, e.rank, int(e.time.timestamp())))
 
             if self.Z_OWNER:
-                _shutil.chown(f.name, user=self.Z_OWNER)
+                shutil.chown(f.name, user=self.Z_OWNER)
 
             # On POSIX, rename() is atomic and will clobber
             # On Windows, neither of these is true, so remove first.
             from xonsh.platform import ON_WINDOWS
-            if ON_WINDOWS and _os.path.exists(self.Z_DATA):
-                _os.remove(self.Z_DATA)
-            _shutil.copy(f.name, self.Z_DATA)
+            if ON_WINDOWS and os.path.exists(self.Z_DATA):
+                os.remove(self.Z_DATA)
+            shutil.copy(f.name, self.Z_DATA)
 
     def _doesitmatch(self, patterns, entry):
         """
@@ -142,7 +143,7 @@ class _ZHandler:
         if args.subdir_only:
             pwd = self.getpwd()
             # XXX: Is there a better way to detect subpath relationship?
-            data = [e for e in data if _os.path.commonpath((pwd, e.path)) == pwd]
+            data = [e for e in data if os.path.commonpath((pwd, e.path)) == pwd]
         if args.mode == 'frecency':
             data.sort(reverse=True, key=lambda e: e.frecency)
         elif args.mode == 'rank':
@@ -154,11 +155,14 @@ class _ZHandler:
             raise RuntimeError("Unknown sort mode: {}".format(args.mode))
 
         # Actually do search
-        pats = list(map(_re.compile, args.patterns))  # Used repeatedly, pre-evaluate
-        data = list(filter(_functools.partial(self._doesitmatch, pats), data))
+        pats = list(map(re.compile, args.patterns))  # Used repeatedly, pre-evaluate
+        data = list(filter(functools.partial(self._doesitmatch, pats), data))
+
+        if not data and args.action != 'list':
+            return "", "No matches found\n", 1
 
         if args.action == 'cd':
-            _built_ins.run_subproc([['cd', data[0].path]])
+            built_ins.run_subproc([['cd', data[0].path]])
         elif args.action == 'echo':
             return data[0].path + '\n'
         elif args.action == 'list':
@@ -167,13 +171,13 @@ class _ZHandler:
 
 
     def getpwd(self):
-        pwd = _os.getcwd()
+        pwd = os.getcwd()
         if not self.Z_NO_RESOLVE_SYMLINKS:
-            pwd = _os.path.normpath(pwd)
+            pwd = os.path.normpath(pwd)
         return pwd
 
     def add(self, path):
-        now = _datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow()
         data = list(self.load_data())
         for i, e in enumerate(data):
             if e.path == path:
