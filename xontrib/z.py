@@ -108,6 +108,7 @@ class _ZHandler:
         with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding()) as f:
             for e in data:
                 f.write("{}|{}|{}\n".format(e.path, int(e.rank), int(e.time.timestamp())))
+            f.flush()
 
             if self.Z_OWNER:
                 shutil.chown(f.name, user=self.Z_OWNER)
