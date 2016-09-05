@@ -87,7 +87,10 @@ class _ZHandler:
             for l in f:
                 l = l.strip()
                 p, r, t = l.split('|')
-                r = int(r)
+                if '.' in r:
+                    r = float(r)
+                else:
+                    r = int(r)
                 if r >= 1:
                     t = datetime.datetime.utcfromtimestamp(int(t))
                     yield _ZEntry(p, r, t)
@@ -102,7 +105,7 @@ class _ZHandler:
         from tempfile import NamedTemporaryFile
         with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding()) as f:
             for e in data:
-                f.write("{}|{}|{}\n".format(e.path, e.rank, int(e.time.timestamp())))
+                f.write("{}|{}|{}\n".format(e.path, int(e.rank), int(e.time.timestamp())))
 
             if self.Z_OWNER:
                 shutil.chown(f.name, user=self.Z_OWNER)
