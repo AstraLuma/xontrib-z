@@ -83,6 +83,8 @@ class _ZHandler:
 
     # XXX: Is there a way to make this more transactional?
     def load_data(self):
+        if not os.path.exists(self.Z_DATA):
+            return
         with open(self.Z_DATA, 'rt') as f:
             for l in f:
                 l = l.strip()
