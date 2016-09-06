@@ -11,9 +11,7 @@ import xonsh.built_ins as built_ins
 
 __all__ = ()
 
-_old_cd = aliases['cd']
-
-class _ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
+class ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
     @property
     def frecency(self):
         dx = datetime.datetime.utcnow() - self.time
@@ -26,7 +24,7 @@ class _ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
         else:
             return self.rank / 4
 
-class _ZHandler:
+class ZHandler:
     """Tracks your most used directories, based on 'frecency'.
 
     After  a  short  learning  phase, z will take you to the most 'frecent'
@@ -95,13 +93,13 @@ class _ZHandler:
                     r = int(r)
                 if r >= 1:
                     t = datetime.datetime.utcfromtimestamp(int(t))
-                    yield _ZEntry(p, r, t)
+                    yield ZEntry(p, r, t)
 
     def save_data(self, data):
         # Age data
         if hasattr(data, '__len__') and len(data) > self.GROOM_THRESHOLD:
             for i, e in enumerate(data):
-                data[i] = _ZEntry(e.path, int(e.rank * self.GROOM_LEVEL), e.time)
+                data[i] = ZEntry(e.path, int(e.rank * self.GROOM_LEVEL), e.time)
 
         # Use a temporary file to minimize time the file is open and minimize clobbering
         from tempfile import NamedTemporaryFile
@@ -187,10 +185,10 @@ class _ZHandler:
         data = list(self.load_data())
         for i, e in enumerate(data):
             if e.path == path:
-                data[i] = _ZEntry(e.path, e.rank+1, now)
+                data[i] = ZEntry(e.path, e.rank+1, now)
                 break
         else:
-            data.append(_ZEntry(path, 1, now))
+            data.append(ZEntry(path, 1, now))
         self.save_data(data)
 
     def remove(self, path):
@@ -207,16 +205,9 @@ class _ZHandler:
         return cls()(args, stdin)
 
 # FIXME: This should be pre-command, not on `cd`
-    @classmethod
-    def cd_handler(cls, args, stdin=None):
-        rtn = _old_cd(args, stdin)
-        try:
-            self = cls()
-            self.add(self.getpwd())
-        except Exception:
-            import traceback
-            traceback.print_exc()
-        return rtn
+@events.on_chdir
+def cd_handler(olddir, newdir):
+    self = ZHandler()
+    self.add(self.getpwd())
 
-aliases['z'] = _ZHandler.handler
-aliases['cd'] = _ZHandler.cd_handler
+aliases['z'] = ZHandler.handler
