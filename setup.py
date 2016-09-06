@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='xontrib-z',
-    version='0.1',
+    version='0.2',
     url='https://github.com/astronouth7303/xontrib-z',
     license='GPLv3',
     author='Jamie Bliss',
