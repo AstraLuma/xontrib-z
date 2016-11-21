@@ -204,9 +204,8 @@ class ZHandler:
     def handler(cls, args, stdin=None):
         return cls()(args, stdin)
 
-# FIXME: This should be pre-command, not on `cd`
-@events.on_chdir
-def cd_handler(olddir, newdir):
+@events.on_precommand
+def cmd_handler(*pargs):
     self = ZHandler()
     self.add(self.getpwd())
 
