@@ -206,7 +206,7 @@ class ZHandler:
 
 # FIXME: This should be pre-command, not on `cd`
 @events.on_chdir
-def cd_handler(olddir, newdir):
+def cd_handler(olddir, newdir, **kwargs):
     self = ZHandler()
     self.add(self.getpwd())
 
