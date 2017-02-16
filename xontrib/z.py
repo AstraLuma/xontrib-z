@@ -204,8 +204,8 @@ class ZHandler:
     def handler(cls, args, stdin=None):
         return cls()(args, stdin)
 
-@events.on_precommand
-def cmd_handler(*pargs):
+@events.on_postcommand
+def cmd_handler(**kwargs):
     self = ZHandler()
     self.add(self.getpwd())
 
