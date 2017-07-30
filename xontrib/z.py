@@ -38,7 +38,7 @@ class ZHandler:
 
     def parser():
         from argparse import ArgumentParser
-        parser = ArgumentParser(prog='avox', description=__doc__)
+        parser = ArgumentParser(prog='z', description=__doc__)
 
         parser.add_argument('patterns', metavar='REGEX', nargs='+',
                             help='Names to match')
