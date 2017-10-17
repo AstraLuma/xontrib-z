@@ -166,7 +166,7 @@ class ZHandler:
             return "", "No matches found\n", 1
 
         if args.action == 'cd':
-            built_ins.run_subproc([['cd', data[0].path]])
+            built_ins.builtins.aliases['cd']([data[0].path])
         elif args.action == 'echo':
             return data[0].path + '\n'
         elif args.action == 'list':
