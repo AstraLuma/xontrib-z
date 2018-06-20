@@ -42,7 +42,7 @@ class ZHandler:
 
         parser.add_argument('patterns', metavar='REGEX', nargs='+',
                             help='Names to match')
-   
+
         parser.add_argument('-c', default=False,
                             action='store_true', dest='subdir_only',
                             help='restrict matches to subdirectories of the current directory')
@@ -102,8 +102,11 @@ class ZHandler:
                 data[i] = ZEntry(e.path, int(e.rank * self.GROOM_LEVEL), e.time)
 
         # Use a temporary file to minimize time the file is open and minimize clobbering
+        # Use delete=False so the file can be closed without removing it. On Windows
+        # you can not copy an open file.
         from tempfile import NamedTemporaryFile
-        with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding()) as f:
+        with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding(),
+                                delete=False) as f:
             for e in data:
                 f.write("{}|{}|{}\n".format(e.path, int(e.rank), int(e.time.timestamp())))
             f.flush()
@@ -111,12 +114,13 @@ class ZHandler:
             if self.Z_OWNER:
                 shutil.chown(f.name, user=self.Z_OWNER)
 
-            # On POSIX, rename() is atomic and will clobber
-            # On Windows, neither of these is true, so remove first.
-            from xonsh.platform import ON_WINDOWS
-            if ON_WINDOWS and os.path.exists(self.Z_DATA):
-                os.remove(self.Z_DATA)
-            shutil.copy(f.name, self.Z_DATA)
+        # On POSIX, rename() is atomic and will clobber
+        # On Windows, neither of these is true, so remove first.
+        from xonsh.platform import ON_WINDOWS
+        if ON_WINDOWS and os.path.exists(self.Z_DATA):
+            os.remove(self.Z_DATA)
+        shutil.copy(f.name, self.Z_DATA)
+        os.remove(f.name)
 
     def _doesitmatch(self, patterns, entry):
         """
@@ -142,7 +146,7 @@ class ZHandler:
         elif args.action == 'remove':
             self.remove(self.pwd())
             return
-        
+
         data = list(self.load_data())
         if args.subdir_only:
             pwd = self.getpwd()
