@@ -74,10 +74,10 @@ class ZHandler:
     parser = lazyasd.LazyObject(parser, locals(), 'parser')
 
     def __init__(self):
-        self.Z_DATA = __xonsh_env__.get('_Z_DATA', os.path.expanduser('~/.z'))
-        self.Z_OWNER = __xonsh_env__.get('_Z_OWNER')
-        self.Z_NO_RESOLVE_SYMLINKS = __xonsh_env__.get('_Z_NO_RESOLVE_SYMLINKS', False)
-        self.Z_EXCLUDE_DIRS = __xonsh_env__.get('_Z_EXCLUDE_DIRS', [])
+        self.Z_DATA = __xonsh__.env.get('_Z_DATA', os.path.expanduser('~/.z'))
+        self.Z_OWNER = __xonsh__.env.get('_Z_OWNER')
+        self.Z_NO_RESOLVE_SYMLINKS = __xonsh__.env.get('_Z_NO_RESOLVE_SYMLINKS', False)
+        self.Z_EXCLUDE_DIRS = __xonsh__.env.get('_Z_EXCLUDE_DIRS', [])
 
     # XXX: Is there a way to make this more transactional?
     def load_data(self):
