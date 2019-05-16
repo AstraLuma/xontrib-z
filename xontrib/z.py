@@ -86,14 +86,19 @@ class ZHandler:
         with open(self.Z_DATA, 'rt') as f:
             for l in f:
                 l = l.strip()
-                p, r, t = l.split('|')
-                if '.' in r:
-                    r = float(r)
-                else:
-                    r = int(r)
-                if r >= 1:
-                    t = datetime.datetime.utcfromtimestamp(int(t))
-                    yield ZEntry(p, r, t)
+                try:
+                    p, r, t = l.split('|')
+                    if '.' in r:
+                        r = float(r)
+                    else:
+                        r = int(r)
+                    if r >= 1:
+                        t = datetime.datetime.utcfromtimestamp(int(t))
+                        yield ZEntry(p, r, t)
+                except:
+                    continue  # skip entry if conversion fails 
+                    # (e.g. on unhandled special characters in path, faulty user edits,
+                    #  or corrupted data file)
 
     def save_data(self, data):
         # Age data
