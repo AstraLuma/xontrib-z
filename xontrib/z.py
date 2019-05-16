@@ -94,11 +94,10 @@ class ZHandler:
                         r = int(r)
                     if r >= 1:
                         t = datetime.datetime.utcfromtimestamp(int(t))
+                        p = p.replace('\\n','\n').replace('\\|','|')
                         yield ZEntry(p, r, t)
                 except:
-                    continue  # skip entry if conversion fails 
-                    # (e.g. on unhandled special characters in path, faulty user edits,
-                    #  or corrupted data file)
+                    continue
 
     def save_data(self, data):
         # Age data
@@ -113,6 +112,7 @@ class ZHandler:
         with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding(),
                                 delete=False) as f:
             for e in data:
+                p = e.path.replace('\n','\\n').replace('|','\\|')
                 f.write("{}|{}|{}\n".format(e.path, int(e.rank), int(e.time.timestamp())))
             f.flush()
 
