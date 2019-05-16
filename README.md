@@ -22,3 +22,5 @@ xontrib load z
 ```
 
 in your `.xonshrc`
+The location of the data file is determined by setting an environment variable `_Z_DATA` 
+(default `~/.z` if not set).
