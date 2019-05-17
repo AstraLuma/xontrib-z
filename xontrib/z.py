@@ -10,7 +10,6 @@ import xonsh.lazyasd as lazyasd
 import xonsh.built_ins as built_ins
 
 __all__ = ()
-print(f'xotrib-z lodad {__file__}')
 
 class ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
     @property
