@@ -10,6 +10,7 @@ import xonsh.lazyasd as lazyasd
 import xonsh.built_ins as built_ins
 
 __all__ = ()
+print(f'xotrib-z lodad {__file__}')
 
 class ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
     @property
@@ -87,15 +88,11 @@ class ZHandler:
             for l in f:
                 l = l.strip()
                 try:
-                    p, r, t = l.split('|')
-                    if '.' in r:
-                        r = float(r)
-                    else:
-                        r = int(r)
+                    p, r, t = l.rsplit('|', 2)
+                    r = float(r)
                     if r >= 1:
-                        t = datetime.datetime.utcfromtimestamp(int(t))
-                        p = p.replace('\\n','\n').replace('\\|','|')
-                        yield ZEntry(p, r, t)
+                        t = datetime.datetime.utcfromtimestamp(float(t))
+                        yield ZEntry(p.replace('\\n','\n'), r, t)
                 except:
                     continue
 
@@ -112,8 +109,8 @@ class ZHandler:
         with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding(),
                                 delete=False) as f:
             for e in data:
-                p = e.path.replace('\n','\\n').replace('|','\\|')
-                f.write("{}|{}|{}\n".format(e.path, int(e.rank), int(e.time.timestamp())))
+                p = e.path.replace('\n','\\n')
+                f.write("{}|{}|{}\n".format(p, int(e.rank), int(e.time.timestamp())))
             f.flush()
 
             if self.Z_OWNER:
