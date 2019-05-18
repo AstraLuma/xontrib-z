@@ -86,14 +86,14 @@ class ZHandler:
         with open(self.Z_DATA, 'rt') as f:
             for l in f:
                 l = l.strip()
-                p, r, t = l.split('|')
-                if '.' in r:
+                try:
+                    p, r, t = l.rsplit('|', 2)
                     r = float(r)
-                else:
-                    r = int(r)
-                if r >= 1:
-                    t = datetime.datetime.utcfromtimestamp(int(t))
-                    yield ZEntry(p, r, t)
+                    if r >= 1:
+                        t = datetime.datetime.utcfromtimestamp(float(t))
+                        yield ZEntry(p.replace('\\n','\n'), r, t)
+                except Exception:
+                    continue
 
     def save_data(self, data):
         # Age data
@@ -108,7 +108,8 @@ class ZHandler:
         with NamedTemporaryFile('wt', encoding=sys.getfilesystemencoding(),
                                 delete=False) as f:
             for e in data:
-                f.write("{}|{}|{}\n".format(e.path, int(e.rank), int(e.time.timestamp())))
+                p = e.path.replace('\n','\\n')
+                f.write("{}|{}|{}\n".format(p, int(e.rank), int(e.time.timestamp())))
             f.flush()
 
             if self.Z_OWNER:
