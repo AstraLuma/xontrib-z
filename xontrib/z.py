@@ -92,7 +92,7 @@ class ZHandler:
                     if r >= 1:
                         t = datetime.datetime.utcfromtimestamp(float(t))
                         yield ZEntry(p.replace('\\n','\n'), r, t)
-                except:
+                except Exception:
                     continue
 
     def save_data(self, data):
