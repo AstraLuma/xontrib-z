@@ -204,6 +204,15 @@ class ZHandler:
                 break
         self.save_data(data)
 
+    @staticmethod
+    def _is_subpath(dirpath, subpath):
+        if not dirpath.endswith(os.sep):
+            dirpath += os.sep
+        return os.path.commonprefix([dirpath, subpath]) == dirpath
+
+    def is_excluded(self, path):
+        return any(d == path or ZHandler._is_subpath(d, path)
+                   for d in self.Z_EXCLUDE_DIRS)
 
     @classmethod
     def handler(cls, args, stdin=None):
@@ -212,6 +221,8 @@ class ZHandler:
 @events.on_postcommand
 def cmd_handler(**kwargs):
     self = ZHandler()
-    self.add(self.getpwd())
+    pwd = self.getpwd()
+    if not self.is_excluded(pwd):
+        self.add(pwd)
 
 aliases['z'] = ZHandler.handler
