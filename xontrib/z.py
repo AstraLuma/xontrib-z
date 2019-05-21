@@ -207,7 +207,7 @@ class ZHandler:
     @classmethod
     def completer(cls, prefix, line, begidx, endidx, ctx):
         if not line.lstrip().startswith('z '):
-            return {}
+            return set()
         opts = cls.parser._option_string_actions.keys()
         return {o for o in opts if o.startswith(prefix)}
 
