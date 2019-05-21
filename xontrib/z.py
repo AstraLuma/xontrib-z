@@ -204,6 +204,12 @@ class ZHandler:
                 break
         self.save_data(data)
 
+    @classmethod
+    def completer(cls, prefix, line, begidx, endidx, ctx):
+        if not line.lstrip().startswith('z '):
+            return set()
+        opts = cls.parser._option_string_actions.keys()
+        return {o for o in opts if o.startswith(prefix)}
 
     @classmethod
     def handler(cls, args, stdin=None):
@@ -215,3 +221,5 @@ def cmd_handler(**kwargs):
     self.add(self.getpwd())
 
 aliases['z'] = ZHandler.handler
+__xonsh__.completers['z'] = ZHandler.completer
+__xonsh__.completers.move_to_end('z', last=False)
