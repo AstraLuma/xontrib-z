@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='xontrib-z',
     version='0.4',
-    url='https://github.com/astronouth7303/xontrib-z',
+    url='https://github.com/AstraLuma/xontrib-z',
     license='GPLv3',
     author='Jamie Bliss',
     author_email='astronouth7303@gmail.com',

@@ -11,7 +11,7 @@ pip install xontrib-z
 
 or you can clone the repo with pip
 ```console
-pip install git+https://github.com/astronouth7303/xontrib-z
+pip install git+https://github.com/AstraLuma/xontrib-z
 ```
 
 ## Configuration
