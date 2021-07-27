@@ -47,6 +47,10 @@ class ZHandler:
                             action='store_true', dest='subdir_only',
                             help='restrict matches to subdirectories of the current directory')
 
+        parser.add_argument('-i', default=False,
+                            action='store_true', dest='case_insensitive',
+                            help='do a case insensitive match')
+
         actions = parser.add_mutually_exclusive_group()
         actions.add_argument('-e', const='echo', default='cd',
                            action='store_const', dest='action',
@@ -78,6 +82,7 @@ class ZHandler:
         self.Z_OWNER = __xonsh__.env.get('_Z_OWNER')
         self.Z_NO_RESOLVE_SYMLINKS = __xonsh__.env.get('_Z_NO_RESOLVE_SYMLINKS', False)
         self.Z_EXCLUDE_DIRS = __xonsh__.env.get('_Z_EXCLUDE_DIRS', [])
+        self.Z_CASE_SENSITIVE = __xonsh__.env.get('_Z_CASE_SENSITIVE', True)
 
     # XXX: Is there a way to make this more transactional?
     def load_data(self):
@@ -153,6 +158,11 @@ class ZHandler:
             pwd = self.getpwd()
             # XXX: Is there a better way to detect subpath relationship?
             data = [e for e in data if os.path.commonpath((pwd, e.path)) == pwd]
+
+        if args.case_insensitive:
+            # override case sensitivity variable
+            self.Z_CASE_SENSITIVE = False
+
         if args.mode == 'frecency':
             data.sort(reverse=True, key=lambda e: e.frecency)
         elif args.mode == 'rank':
@@ -164,7 +174,8 @@ class ZHandler:
             raise RuntimeError("Unknown sort mode: {}".format(args.mode))
 
         # Actually do search
-        pats = list(map(re.compile, args.patterns))  # Used repeatedly, pre-evaluate
+        pats = [re.compile(pattern, flags=0 if self.Z_CASE_SENSITIVE else re.IGNORECASE)
+                for pattern in args.patterns]
         data = list(filter(functools.partial(self._doesitmatch, pats), data))
 
         if not data and args.action != 'list':

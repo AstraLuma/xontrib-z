@@ -22,5 +22,11 @@ xontrib load z
 ```
 
 in your `.xonshrc`
-The location of the data file is determined by setting an environment variable `_Z_DATA` 
+
+### Environment variables
+The location of the data file is determined by setting the environment variable `_Z_DATA` 
 (default `~/.z` if not set).
+
+* Ignore case-sensitive matching by setting `_Z_CASE_SENSITIVE` to `False`.
+* Exclude directories from consideration by adding them to `_Z_EXCLUDE_DIRS`.
+* Ignore symlinks by setting `_Z_NO_RESOLVE_SYMLINKS` to `True`.
