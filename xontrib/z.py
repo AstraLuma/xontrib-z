@@ -6,8 +6,8 @@ import functools
 import collections
 import datetime
 import shutil
-import xonsh.lazyasd as lazyasd
 import xonsh.built_ins as built_ins
+import xonsh.lib.lazyasd as lazyasd
 
 __all__ = ()
 
