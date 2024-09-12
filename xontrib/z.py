@@ -14,7 +14,7 @@ __all__ = ()
 class ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
     @property
     def frecency(self):
-        dx = datetime.datetime.utcnow() - self.time
+        dx = datetime.datetime.now(datetime.timezone.utc) - self.time
         if dx < datetime.timedelta(hours=1):
             return self.rank * 4
         elif dx < datetime.timedelta(days=1):
@@ -95,7 +95,7 @@ class ZHandler:
                     p, r, t = l.rsplit('|', 2)
                     r = float(r)
                     if r >= 1:
-                        t = datetime.datetime.utcfromtimestamp(float(t))
+                        t = datetime.datetime.fromtimestamp(float(t),datetime.timezone.utc)
                         yield ZEntry(p.replace('\\n','\n'), r, t)
                 except Exception:
                     continue
@@ -197,7 +197,7 @@ class ZHandler:
         return pwd
 
     def add(self, path):
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         data = list(self.load_data())
         for i, e in enumerate(data):
             if e.path == path:
